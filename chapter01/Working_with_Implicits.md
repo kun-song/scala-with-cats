@@ -98,8 +98,9 @@ Json.toJson(Option("hello"))(optionWriter(stringWriter))
 
 
 >隐式转换
+>
 >注意，创建 `optionWriter` 时，必须将它的参数标注为 `implicit`，否则编译器在执行 implicit resolution 时，会将其排除在外。
 >
 >参数不是 `implicit` 的 `implicit` 方法，实际上是另一个 Scala 模式，即 implicit conversion，这是很老的编程模式，现代 Scala 已经不鼓励使用。
-
+>
 >若去掉 `optionWriter` 参数中的 `implicit` 关键字，编译器将报错，此时需要明确开启 implicit conversion 特性：`import scala.language.implicitConversions`！
