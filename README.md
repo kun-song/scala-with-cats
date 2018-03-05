@@ -7,3 +7,4 @@ scala with cats 一书的笔记、习题
     * [1.2 Working with Implicits](chapter01/Working_with_Implicits.md)
     * [1.3 Exercise: Printable Library](chapter01/Exercise_Printable_Library.md)
     * [1.4 Meet Cats](chapter01/Meet_Cats.md)
+    * [1.5 Example: Eq](chapter01/Example_Eq.md)
