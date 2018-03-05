@@ -9,3 +9,4 @@ scala with cats 一书的笔记、习题
     * [1.4 Meet Cats](chapter01/Meet_Cats.md)
     * [1.5 Example: Eq](chapter01/Example_Eq.md)
     * [1.6 Controlling Instance Selection](chapter01/Controlling_Instance_Selection.md)
+    * [1.7 Summary](chapter01/Summary.md)
