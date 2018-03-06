@@ -10,3 +10,6 @@ scala with cats 一书的笔记、习题
     * [1.5 Example: Eq](chapter01/Example_Eq.md)
     * [1.6 Controlling Instance Selection](chapter01/Controlling_Instance_Selection.md)
     * [1.7 Summary](chapter01/Summary.md)
+* [Chapter 2 Monoids and Semigroups](chapter02/Introduction.md)
+    * [2.1 Definition of a Monoid](chapter02/Definition_of_a_Monoid.md)
+    * [2.2 Definition of a Semigroup](chapter02/Definition_of_a_Semigroup.md)
