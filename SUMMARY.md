@@ -12,4 +12,6 @@
 * [Chapter 2 Monoids and Semigroups](chapter02/Introduction.md)
     * [2.1 Definition of a Monoid](chapter02/Definition_of_a_Monoid.md)
     * [2.2 Definition of a Semigroup](chapter02/Definition_of_a_Semigroup.md)
+    * [2.3 Exercise: The Truth About Monoids](chapter02/Exercise_The_Truth_About_Monoids.md)
+    * [2.4 Exercise: All Set for Monoids](chapter02/Exercise_All_Set_for_Monoids.md)
 
