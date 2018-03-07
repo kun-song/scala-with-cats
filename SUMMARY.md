@@ -14,4 +14,7 @@
     * [2.2 Definition of a Semigroup](chapter02/Definition_of_a_Semigroup.md)
     * [2.3 Exercise: The Truth About Monoids](chapter02/Exercise_The_Truth_About_Monoids.md)
     * [2.4 Exercise: All Set for Monoids](chapter02/Exercise_All_Set_for_Monoids.md)
+    * [2.5 Monoids in Cats](chapter02/Monoids_in_Cats.md)
+    * [2.6 Applications of Monoids](chapter02/Applications_of_Monoids.md)
+    * [2.7 Summary](chapter02/Summary.md)
 
