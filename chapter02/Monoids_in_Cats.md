@@ -85,6 +85,8 @@ a combine b
 
 ### 2.5.4 Exercise: Adding All The Things
 
+#### 第一版
+
 首先实现 `add(items: List[Int]): Int`，有两种实现方式，第一种使用 `List.foldLeft`：
 
 ```Scala
@@ -103,8 +105,69 @@ def add(items: List[Int]): Int = {
 }
 ```
 
-实现 `add(items: List[Option[Int]]): Int`：
+#### 第二版
+
+需要变化非常快，现在要求 `add` 函数也能实现 `Option[Int]` 的加法，即 `add` 函数需要兼容 `Int` 和 `Option[Int]` 类型入参，此时只能使用 `Monoid` 来实现了：
 
 ```Scala
+import cats.Monoid
+import cats.syntax.semigroup._
 
+def add[A](items: List[A])(implicit m: Monoid[A]): A =
+  items.foldLeft(m.empty)(_ |+| _)
+```
+
+此时可以通过 Scala 的 [context bound](https://docs.scala-lang.org/tutorials/FAQ/context-bounds.html) 来简化 `add` 的定义，使其更加精简：
+
+```Scala
+import cats.Monoid
+import cats.syntax.semigroup._
+
+def add[A: Monoid](items: List[A]): A =
+  items.foldLeft(Monoid[A].empty)(_ |+| _)
+```
+
+* 去掉了 `(implicit m: Monoid[A])` 参数，增加 `[A: Monoid]`，`[A: Monoid]` 用来描述 `implicit` 值，表示在 `add` 函数中，有一个可用的 `Monoid[A]` 值；
+* `add` 内部，通过 `Monoid[A]`（即 `Monoid.apply[A]`）来获取 `implicit` 值；
+
+现在，只要在 `implicit` 作用域中有合适的 `Monoid` 实例，就可以使用 `add` 函数了：
+
+```Scala
+val xs = List(1, 2, 3)
+
+import cats.instances.int._
+add(xs)
+
+val os = xs.map(Option(_))
+
+import cats.instances.option._
+add(os)
+```
+
+#### 第三版
+
+需求继续变化，现在 `add` 需要实现对 `Order` 类型的累加：
+
+```Scala
+case class Order(totalCost: Double, quantity: Double)
+```
+
+因为 `add` 目前依赖 `Monoid` 实例实现累加操作，所以不管什么类型，只要提供该类型的 `Monoid` 实例，`add` 就可以工作：
+
+```Scala
+object Order {
+  implicit val orderMonoid: Monoid[Order] =
+    new Monoid[Order] {
+      override def empty: Order = Order(0, 0)
+      override def combine(x: Order, y: Order): Order =
+        Order(x.totalCost + y.totalCost, x.quantity + y.quantity)
+    }
+}
+```
+
+将 `orderMonoid` 放在 `Order` 伴生对象中，省去 `import` 的麻烦，直接使用 `add` 即可：
+
+```Scala
+val orders = List(Order(1, 2), Order(3, 4))
+add(orders)
 ```
