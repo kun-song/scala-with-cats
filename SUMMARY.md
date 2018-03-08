@@ -17,4 +17,9 @@
     * [2.5 Monoids in Cats](chapter02/Monoids_in_Cats.md)
     * [2.6 Applications of Monoids](chapter02/Applications_of_Monoids.md)
     * [2.7 Summary](chapter02/Summary.md)
+* [Chapter 3 Functors](chapter03/Introduction.md)
+    * [3.1 Examples of Functors](chapter03/Examples_of_Functors.md)
+    * [3.2 More Examples of Functors](chapter03/More_Examples_of_Functors.md)
+    * [3.3 Definition of a Functor](chapter03/Definition_of_a_Functor.md)
+    * [3.4 Aside: Higher Kinds and Type Constructors](chapter03/Aside_Higher_Kinds_and_Type_Constructors.md)
 
