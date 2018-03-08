@@ -23,3 +23,31 @@ val f: Future[String] =
 
 Await.result(f, 1.second)  // 666!
 ```
+
+但 `Future` 并非引用透明的，所以不是展示 pure fp 的最佳例子。
+
+## Functions 
+
+实际上，只有 **一个** 参数的函数 `Function1` 也是 functor（惊不惊喜？），在 `Function1` 上执行 `map` 实质就是 **函数组合**：
+
+
+```Scala
+import cats.instances.function._
+import cats.syntax.functor._
+
+val f: Int ⇒ Int = x => x * 6
+val g: Int => String = x => x + "!"
+
+// 通过 map 实现的函数组合
+(f map g)(1)
+
+// 通过 andThen 实现的函数组合
+(f andThen g)(1)
+
+// 手撸的函数组合
+(g(f(1))
+```
+
+`Function1` 本身代表了一次计算，每次调用 `map` 都会在原来基础上 **添加** 一层计算，最后得到的是 `sequence of computations`，到只调用 `map` 是不会有任何实际运算发生的。
+
+最后给它一个实际参数，这才能使整个计算序列真正执行起来，这可以视为某种形式的惰性计算，类似 `Future`。
