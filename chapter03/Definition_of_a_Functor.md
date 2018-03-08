@@ -32,7 +32,7 @@ functor 可以保证以下两种操作语义相同：
 
 ### Identity
 
-Identity: calling map with the **identity function** is the same as doing nothing:
+Identity: calling `map` with the **identity function** is the same as doing nothing:
 
 ```Scala
 fa.map(a => a) == fa
@@ -40,7 +40,7 @@ fa.map(a => a) == fa
 
 ### Composition
 
-Composition: mapping with two functions f and g is the same as mapping with f and then mapping with g:
+Composition: mapping with two functions `f` and `g` is the same as mapping with `f` and then mapping with `g`:
 
 ```Scala
 fa.map(g(f(_))) == fa.map(f).map(g)

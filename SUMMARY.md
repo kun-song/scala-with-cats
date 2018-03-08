@@ -22,4 +22,5 @@
     * [3.2 More Examples of Functors](chapter03/More_Examples_of_Functors.md)
     * [3.3 Definition of a Functor](chapter03/Definition_of_a_Functor.md)
     * [3.4 Aside: Higher Kinds and Type Constructors](chapter03/Aside_Higher_Kinds_and_Type_Constructors.md)
+    * [3.5 Functors in Cats](chapter03/Functors_in_Cats.md)
 
