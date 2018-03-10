@@ -1,4 +1,4 @@
-# 第一章 入门
+# Chapter 1 Introduction
 
 Cats 提供了非常丰富的函数式编程工具，并允许用户按需选用，其中大多数工具是以 type class 的形式提供的。
 
