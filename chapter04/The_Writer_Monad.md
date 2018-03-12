@@ -160,11 +160,79 @@ w1.swap
 
 ## 4.7.3 Exercise: Show Your Working
 
+前面说过 `Writer` 可以用于多线程场景中 *顺序** 打印日志，现在如下求斐波那契数列的函数：
 
+```Scala
+def slowly[A](body: => A) =
+  try body finally Thread.sleep(100)
 
+def factorial(n: Int): Int = {
+  val ans = slowly(if(n == 0) 1 else n * factorial(n - 1))
+  println(s"fact $n $ans")
+  ans
+}
+```
 
+在多线程中，无法分辨 `println` 输出到底是属于哪个线程：
 
+```Scala
+/**
+  * fact 0 1
+  * fact 0 1
+  * fact 1 1
+  * fact 1 1
+  * fact 2 2
+  * fact 2 2
+  * fact 3 6
+  */
+Await.result(Future.sequence(Vector(
+  Future(factorial(2)),
+  Future(factorial(3))
+)), 5.seconds)
+```
 
+使用 `Writer` 改写如下：
 
+```Scala
+def factorial(n: Int): Writer[Vector[String], Int] = {
+  slowly(
+    if(n == 0) 1 writer Vector("fact 0 1")
+    else {
+      factorial(n - 1).mapBoth((w, result) ⇒ {
+        val ans = result * n
+        val log = w :+  s"fact $n $ans")
+        (log, ans)
+      })
+    }
+  )
+}
+```
 
+此时使用 `Vector[String]` 保存日志：
 
+```Scala
+/**
+  * Vector(WriterT((Vector(fact 0 1, fact 1 1, fact 2 2),2)), 
+  *        WriterT((Vector(fact 0 1, fact 1 1, fact 2 2, fact 3 6),6)))
+  */
+Await.result(Future.sequence(Vector(
+  Future(factorial(2)),
+  Future(factorial(3))
+)), 5.seconds)
+```
+
+现在虽然满足题目要求，但是实现却有点繁琐，用 for 解析改写：
+
+```Scala
+import cats.data.Writer
+import cats.syntax.writer._
+import cats.syntax.applicative._
+
+type Log[A] = Writer[Vector[String], A]
+
+def factorial(n: Int): Writer[Vector[String], Int] =
+  for {
+    ans ← if (n == 0) 1.pure[Log] else slowly(factorial(n - 1).map(_ * n))
+    _   ← Vector(s"fact $n $ans").tell
+  } yield ans
+```
