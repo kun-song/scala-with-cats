@@ -227,7 +227,7 @@ val program: CalcState[Int] =
 // res0: (List[Int], Int) = (List(666),666)
 program.run(Nil).value
 ```
-* 大部分计算都 **发生在 stack* 上**，因此忽略 `evalOne("111")` 和 `evalOne("6")` 的 **中间结果**
+* 大部分计算都 **发生在 stack** 上，因此忽略 `evalOne("111")` 和 `evalOne("6")` 的 **中间结果**
 
 将上面的代码泛化，实现 `evalAll`，实现对 `List[String]` 的计算：
 
@@ -257,3 +257,26 @@ evalAll2(List("1", "2", "+", "3", "*")).run(Nil).value
 ```
 
 ### 3. 计算字符串
+
+因为 `evalOne` 和 `evalAll` 都返回 `State`，因此可以用 `map` 和 `flatMap` 任意组合它们：
+
+```Scala
+val f =
+  for {
+    _ ← evalAll(List("1", "5", "+"))
+    _ ← evalAll(List("110", "1", "+"))
+    x ← evalOne("*")
+  } yield x
+
+// res3: (List[Int], Int) = (List(666),666)
+f.run(Nil).value
+```
+
+本练习最后以实现 `evalInput` 函数结束，该函数接受 `String` 格式的后缀表达式，返回其计算结果：
+
+```Scala
+def evalInput(input: String): Int =
+  evalAll(input.split(" ").toList).runA(Nil).value
+
+evalInput("1 2 + 3 *")  // 9
+```
