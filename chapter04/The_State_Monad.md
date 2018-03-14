@@ -153,3 +153,107 @@ program.run(1).value  // res0: (Int, (Int, Int, Int)) = (3,(1,2,3000))
 ```
 
 ## 4.9.3 Exercise: Post-Order Calculator
+
+后缀表达式很简单，即：
+
+```Scala
+1 2 * 2 +
+```
+
+后缀表达式对人类比较难理解，但程序却很容易处理它们：
+
+* 从左到右遍历输入字符串，并携带一个 oprand 栈：
+  + 若当前字符为数字，则入栈
+  + 若当前字符为 operator，则从 stack 弹出两个 operand，计算它们，并将结果入栈
+  
+ 使用 `State` 实现一个后缀表达式的解释器，输入 `1 2 + 2 *` 这样的字符串，可以计算其结果。
+ 
+ 思路：将 **单个字符** 解析为一个 `State` 实例，该实例代表 **stack 的转换 + 中间结果**，使用 `flatMap` 连接 `State` 实例，从而实现对任意 **符序列** 的解析。
+ 
+ ### 1. 计算单个字符
+ 
+ 实现 `evalOne` 函数，用于解析单个字符：
+ 
+ ```Scala
+ import cats.data.State
+
+type CalcState[A] = State[List[Int], A]
+
+def operand(n: Int): CalcState[Int] =
+  State {
+    stack ⇒ (n :: stack, n)
+  }
+
+def operator(op: (Int, Int) ⇒ Int): CalcState[Int] =
+  State {
+    case a :: b :: tl ⇒ val ans = op(a, b); (ans :: tl, ans)
+    case _            ⇒ sys.error("Fail!")
+  }
+
+def evalOne(sym: String): CalcState[Int] =
+  sym match {
+    case "+"  ⇒ operator(_ + _)
+    case "-"  ⇒ operator(_ - _)
+    case "*"  ⇒ operator(_ * _)
+    case "/"  ⇒ operator(_ / _)
+    case x    ⇒ operand(x.toInt)
+  }
+ ```
+
+使用 `evalOne` 可以计算单个字符组成的表达式，例如：
+
+```Scala
+evalOne("10").run(Nil).value  // (List(10), 10)
+evalOne("+").run(Nil).value  // 运行时异常 Fail!
+```
+
+使用 `evalOne` 时，需要：
+
+* 提供 `Nil` 作为 initial state
+* 只能计算数值，如果传入 `+` 则抛异常
+
+## 2. 计算字符序列
+
+借助 `evalOne` `map` 和 `flatMap` 可以实现更复杂序列的计算：
+
+```Scala
+val program: CalcState[Int] =
+  for {
+    _ ← evalOne("111")
+    _ ← evalOne("6")
+    x ← evalOne("*")
+  } yield x
+
+// res0: (List[Int], Int) = (List(666),666)
+program.run(Nil).value
+```
+* 大部分计算都 **发生在 stack* 上**，因此忽略 `evalOne("111")` 和 `evalOne("6")` 的 **中间结果**
+
+将上面的代码泛化，实现 `evalAll`，实现对 `List[String]` 的计算：
+
+```Scala
+import cats.data.State
+import cats.syntax.applicative._
+
+def evalAll(input: List[String]): CalcState[Int] =
+  input.foldLeft(0.pure[CalcState])((state, x) ⇒ {
+    for {
+      _ ← state  // 未用到 state 的计算结果
+      b ← evalOne(x)
+    } yield b
+  })
+  
+def evalAll2(input: List[String]): CalcState[Int] =
+  input.foldLeft(0.pure[CalcState])((state, x) ⇒ state.flatMap(_ ⇒ evalOne(x)))  // // 未用到 state 的计算结果
+```
+
+`evalAll` 使用如下：
+
+```Scala
+// res0: (List[Int], Int) = (List(3),3)
+evalAll(List("1", "2", "+")).run(Nil).value
+// res1: (List[Int], Int) = (List(9),9)
+evalAll2(List("1", "2", "+", "3", "*")).run(Nil).value
+```
+
+### 3. 计算字符串
