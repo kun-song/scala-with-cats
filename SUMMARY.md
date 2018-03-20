@@ -41,4 +41,11 @@
     * [5.3 Monad Transformers in Cats](chapter05/Monad_Transformers_in_Cats.md)
     * [5.4 Exercise: Monads: Transform and Roll Out](chapter05/Exercise_Monads_Transform_and_Roll_Out.md)
     * [5.5 Summary](chapter05/Summary.md)
+* [Chapter 6 Semigroupal and Applicative](chapter06/Introduction.md)
+    * [6.1 Semigroupal](chapter06/Semigroupal.md)
+    * [6.2 Apply Syntax](chapter06/Apply-Syntax.md)
+    * [6.3 Semigroupal Applied to Different Types](chapter06/Semigroupal-Applied-to-Different-Types.md)
+    * [6.4 Validated](chapter06/Validated.md)
+    * [6.5 Apply and Applicative](chapter06/Apply-and-Applicative.md)
+    * [6.5 Summary](chapter06/Summary.md)
 
