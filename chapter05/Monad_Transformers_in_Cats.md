@@ -165,3 +165,144 @@ for {
 ```
 
 `FutureEitherOption` 的 `map` 和 `flatMap` 将横切 3 个 monad，使用很方便。
+
+## 5.3.3 Constructing and Unpacking Instances
+
+可以用 monad transfromer 的 `apply` 或者 `Applicative` 的 `pure` 函数来创建 monad stacks 的实例：
+
+```Scala
+type ErrorOr[A] = Either[String, A]
+type ErrorOrOption[A] = OptionT[ErrorOr, A]
+
+// cats.data.OptionT[ErrorOr,Int] = OptionT(Right(Some(111))
+val a = OptionT[ErrorOr, Int](Right(Some(111)))
+
+// ErrorOrOption[Int] = OptionT(Right(Some(111)))
+val b = 6.pure[ErrorOrOption]
+```
+
+实例创建完成后，可以 `value` 函数对其 **解包**，解包后获得内层的 monad，从而可使用普通 monad 的各种函数：
+
+```Scala
+// x: Option[Int] = Some(111)
+val x = a.value.getOrElse(None)
+
+// y: ErrorOr[Option[Int]] = Right(Some(6))
+val y = b.value
+```
+* `a` 类型为 `OptionT[ErrorOr, Int]`，使用 `a.value` 获取 `OptionT` 内包裹的类型，即 `ErrorOr`，而 `ErrorOr` 实际包裹了 `Option`，所以最后获取的是 `ErrorOr[Option]`
+
+每次调用 `value` 都会对 monad stack 执行一层解包，多是嵌套多层，则需要调用多次 `value`：
+
+```Scala
+import cats.data.{EitherT, OptionT}
+import cats.instances.future._
+import cats.instances.either._
+import cats.syntax.applicative._
+
+import scala.concurrent.{Await, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
+
+type FutureEither[A] = EitherT[Future, String, A]
+
+type FutureEitherOption[A] = OptionT[FutureEither, A]
+
+val f = 111.pure[FutureEitherOption]
+// e: scala.concurrent.Future[Either[String,Option[Int]]] = Future(Success(Right(Some(111))))
+val e = f.value.value
+
+val result = Await.result(e, 1.second)
+
+val c =
+  for {
+    a ← 111.pure[FutureEitherOption]
+    b ← 6.pure[FutureEitherOption]
+  } yield a * b
+
+Await.result(c.value.value, 1.second)
+```
+
+* `FutureEitherOption` 由两个 monad 嵌套组成，因此需要调用两个 `value`
+* 调用两个 `value` 结果类型为 `Future(Success(Right(Some(111))))`
+* 只有使用 `value` 解包后，才能用其调用 `Await.result` 函数
+
+## 5.3.4 Default Instances
+
+Cats 中很多 monad 是通过 **monad transformer + `Id` monad** 定义的，这保证了 monad 及其对应的 monad transformer 的 **API 一致性**。
+
+`Reader` `Writer` 和 `State` 都是通过 transformer + `Id` 定义的：
+
+```Scala
+type Reader[E, A] = ReaderT[Id, E, A] // = Kleisli[Id, E, A]
+type Writer[W, A] = WriterT[Id, W, A]
+type State[S, A]  = StateT[Id, S, A]
+```
+
+有的 monad 与其 transformer 是分开定义的，这时，transformer 会尽量与其 monad 保持 API 一致，例如 `OptionT` 和 `EitherT`。
+
+## 5.3.5 Usage Patterns
+
+因为 monad transformer 以 **预定义好** 的方式组合使用 monad，因此很难 **大规模** 使用。若设计不好，则在应用各部分，可能需要不断的进行 unpack/repack，以实现对最内层的 content 进行操作。
+
+有两种设计模式可以处理该问题。
+
+### A single "Super Stack"
+
+若代码天然具备内在统一性，则可以创建一个 super stack，应用中全部使用它。
+
+例如在 web 应用中，可以决定每个 request handler 都是的，且都可能失败，其失败错误码都是 HTTP 标准错误，该场景中，可以组合 `Future` 和 `Either` 为新 monad，并在应用中广泛使用：
+
+```Scala
+sealed abstract class HttpError
+
+final case class NotFound(item: String) extends HttpError
+final case class BadRequest(msg: String) extends HttpError
+// etc...
+
+type FutureEither[A] = EitherT[Future, HttpError, A]
+```
+
+### Monad Transformers as Local "Glue Code" 
+
+若代码非常复杂，无法保持一致性，在不同场景中需要使用不同的 **monad stack**，则可以仅将 monad stack 作为内部使用，即：
+
+1. 模块之间暴露 untransformed stacks
+2. 模块内部将其他模块的 untransformed stacks 进行转换，生成 monad stack，供内部使用
+
+这样一来，每个模块内部都可以根据实际业务需要，挑选合适的 monad transformer 使用：
+
+```Scala
+import cats.data.Writer
+
+type Logged[A] = Writer[List[String], A]
+
+// Methods generally return untransformed stacks:
+def parseNumber(str: String): Logged[Option[Int]] =
+  util.Try(str.toInt).toOption match {
+    case Some(num) => Writer(List(s"Read $str"), Some(num))
+    case None      => Writer(List(s"Failed on $str"), None)
+  }
+
+// Consumers use monad transformers locally to simplify composition:
+def addAll(a: String, b: String, c: String): Logged[Option[Int]] = {
+  import cats.data.OptionT
+
+  val result = for {
+    a <- OptionT(parseNumber(a))
+    b <- OptionT(parseNumber(b))
+    c <- OptionT(parseNumber(c))
+  } yield a + b + c
+
+  result.value
+}
+
+// This approach doesn't force OptionT on other users' code:
+val result1 = addAll("1", "2", "3")
+// result1: Logged[Option[Int]] = WriterT((List(Read 1, Read 2, Read 3),Some(6)))
+
+val result2 = addAll("1", "a", "3")
+// result2: Logged[Option[Int]] = WriterT((List(Read 1, Failed on a),None))
+```
+
+**注意**：monad transformer 不是万能良药，适合不适合用取决于很多因素，例如团队的大小和经验，代码的复杂度等等。
