@@ -100,7 +100,7 @@ xs.flatMap { ox ⇒ {
 >例子中的代码是如何 **糅合** 在一起的呢？从 `import` 就可以看出一切。
 >
 >例子中导入 `cats.syntax.applicative` 以获取 `pure` syntax。
-
+>
 >1. `pure` 需要一个 `implicit` `Applicative[ListOption]` 实例做为参数. 所有 `Monad`s 都是 `Applicative`s，所以暂时不区分两者。
 >
 >2. 为产生 `Applicative[ListOption]` 实例，需要有 `Applicative[List]` 和 `Applicative[OptionT]` 实例：
