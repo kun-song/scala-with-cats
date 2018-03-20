@@ -36,7 +36,7 @@
 2. transformer 第一个类型参数：代表 monad stack 中的 **outer monad**
 3. transformer 第二个类型参数：最深层的 monad context 类型
 
-例如前面例子中的 `ListOption`，它是 `OptionT[List, A]` 的别名，而 `OptionT[List, A]` 实际上是 `List[Option[A]`，即创建 monad stack 时，采用 **由内而外** 的顺序构建：
+例如前面例子中的 `ListOption`，它是 `OptionT[List, A]` 的别名，而 `OptionT[List, A]` 实际上是 `List[Option[A]]`，即创建 monad stack 时，采用 **由内而外** 的顺序构建：
 
 ```Scala
 type ListOption[A] = OptionT[List, A]
@@ -101,12 +101,26 @@ a.flatMap { x ⇒
 假如想创建 **a `Future` of `Either` of `Option`**，按照 **从内向外** 的原则，需要创建的 monad 为 **a `OptionT` of `EitherT` of `Future`**，直接按照定义写：
 
 ```Scala
-type FutureEitherOption[A] = OptionT[EitherT[Future, ?, A], A]
+type FutureEitherOption[A] = OptionT[EitherT[?, ?, A], A]
 ```
 
+`EiterT` 需要 3 个类型参数，而 `FutureEitherOption` 只提供了一个类型参数 `A`，那 `EitherT` 另外两个参数应该是什么呢？尝试直接将 `F` 固定为 `Future`，将 `E` 固定为 `String` 试试：
 
+```Scala
+type FutureEitherOption[A] = OptionT[EitherT[Future, String, A], A]
+```
 
-由于 `EiterT` 需要 3 个类型参数，因此在 1 行内根本无法完成定义：
+编译后发现，该定义会报如下错误：
+
+```Scala
+Error:(8, 39) cats.data.EitherT[scala.concurrent.Future,String,A] takes no type parameters, expected: one
+type FutureEitherOption[A] = OptionT[EitherT[Future, String, A], A]
+                                     ^
+```
+
+错误提示为 `EitherT` **takes no type parameters**，而 Scala 要求 `OptionT` 第一个参数必须 **有且仅有** 一个类型参数，因此在 1 行内根本无法完成定义。
+
+`EitherT` 简单定义如下：
 
 ```Scala
 case class EitherT[F[_], E, A](stack: F[Either[E, A]]) {
@@ -117,8 +131,37 @@ case class EitherT[F[_], E, A](stack: F[Either[E, A]]) {
 * `E` 是错误类型
 * `A` 是正确类型
 
-为了将 `EitherT` 转换为 **只有 1 个类型参数** 的 type constructor，此处，我们将 `F` 固定为 `Future`，将 `E` 固定为 `String`:
+为了将 `EitherT` 转换为 **只有 1 个类型参数** 的 type constructor，此处，需要使用 **类型别名**，还是将 `F` 固定为 `Future`，将 `E` 固定为 `String`:
 
 ```Scala
-
+type FutureEither[A] = EitherT[Future, String, A]
 ```
+
+`FutureEither` 变成了只有一个类型参数的 type constructor，可以用作 `OptionT` 的第一个参数：
+
+```Scala
+type FutureEitherOption[A] = OptionT[FutureEither, A]
+```
+
+`FutureEitherOption` 是我们组合后的 monad，它由 3 个 monad 嵌套组成，使用如下：
+
+```Scala
+import cats.data.{EitherT, OptionT}
+import cats.instances.future._
+import cats.syntax.applicative._
+
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+
+type FutureEither[A] = EitherT[Future, String, A]
+
+type FutureEitherOption[A] = OptionT[FutureEither, A]
+
+
+for {
+  a ← 111.pure[FutureEitherOption]
+  b ← 6.pure[FutureEitherOption]
+} yield a * b
+```
+
+`FutureEitherOption` 的 `map` 和 `flatMap` 将横切 3 个 monad，使用很方便。
