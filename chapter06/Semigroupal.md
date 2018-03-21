@@ -1,6 +1,6 @@
 # 6.1 Semigroupal
 
-`cats.Semigroupal` 用来 **组合 context**，假设有类型为 `F[A]` `F[B]` 的对象，`Semigroupal[F]` 可以将其组合为 `F[A, B]`，其在 Cats 中定义如下：
+`cats.Semigroupal` 用来 **组合 context**，假设有类型为 `F[A]` `F[B]` 的对象，`Semigroupal[F]` 可以将其组合为 `F[(A, B)]`，其在 Cats 中定义如下：
 
 ```Scala
 trait Semigroupal[F[_]] {
