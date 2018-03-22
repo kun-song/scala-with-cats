@@ -2,6 +2,8 @@
 
 Cats 通过 `cats.syntax.apply` 为 6.1 节中的方法提供了方便的 apply syntax。
 
+### `tupled`
+
 `tupled` 简化了 `Semigroupal` 伴生对象中的 `tuple2` -> `tuple22` ，`tupled` 需要一个 `implicit` 的 `Semigroupal` 实例：
 
 ```Scala
@@ -13,6 +15,8 @@ val x = (Option(1), Option(2), Option(3)).tupled
 ```
 * 通过 `cats.syntax.apply`，隐式地为 `tuple` 添加了 `tupled` 函数，该函数内部使用 `Semigroupal[Option]` 实例实现
 * `tupled` 是通过 `Semigroupal` 实例实现的，因此只支持 2-22 数量的 `tuple`
+
+## `mapN`
 
 `mapN` 简化了 `Semigroupal` 伴生对象中的 `map2` -> `map22`，`mapN` 需要一个 `implicit` 的 `Functor` 实例：
 
@@ -43,7 +47,7 @@ val add: (Int, Int) => Int = (a, b) => a + b
 (Option("cats"), Option(true)).mapN(add)
 // <console>:27: error: type mismatch;
 //  found   : (Int, Int) => Int
-//  required: (String, Boolean) => ?
+//  required: (String, Boolean) => ?z
 //        (Option("cats"), Option(true)).mapN(add)
 //  
 ``` 
