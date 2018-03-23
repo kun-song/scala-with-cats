@@ -71,7 +71,7 @@ Cats 为 `combine` 函数定义了友好的操作符 `|+|`，`|+|` 定义在 `ca
 import cats.instances.int._
 import cats.instances.option._
 import cats.syntax.semigroup._
-// or cats.syntax.monoid._s
+// or cats.syntax.monoid._
 
 val a = Option(1)
 val b = Option(2)
