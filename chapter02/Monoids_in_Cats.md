@@ -1,6 +1,6 @@
 # 2.5 Monoids in Cats
 
-前面都是手撸的 `Monoid`，`Monoid` 在 Cats 中是怎么实现的呢？`Monoid` 是 type class，所以我们需要了解其三大组成部分（type class + instance * interface syntax）分别是如何实现的。 
+前面都是手撸的 `Monoid`，`Monoid` 在 Cats 中是怎么实现的呢？`Monoid` 是 type class，所以我们需要了解其三大组成部分（type class + instance + interface syntax）分别是如何实现的。 
 
 ## 2.5.1 The `Monoid` Type Class
 
