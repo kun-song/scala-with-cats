@@ -415,7 +415,8 @@ nonNegative("age")(-1)
 
 ```Scala
 def readName(data: FormData): FailFast[String] =
-  getValue("name")(data).flatMap(nonBlank("name"))
+  getValue("name")(data)
+    .flatMap(nonBlank("name"))
 
 def readAge(data: FormData): FailFast[Int] =
   getValue("age")(data)
@@ -424,3 +425,42 @@ def readAge(data: FormData): FailFast[Int] =
     .flatMap(nonNegative("age"))
 ```
 
+* `readName` 必须满足 `nonBlank` 一条规则
+* `readAge` 必须满足 `nonBlank` 和 `nonNegative` 两条规则
+* 使用 `flatMap` 串联规则，因为实际中可能有非常非常多的规则，但只要有一条规则不满足，就立即返回，这符合业务要求
+
+使用如下：
+
+```Scala
+readName(Map("name" -> "Dade Murphy"))
+// res41: FailFast[String] = Right(Dade Murphy)
+
+readName(Map("name" -> ""))
+// res42: FailFast[String] = Left(List(name cannot be blank))
+
+readName(Map())
+// res43: FailFast[String] = Left(List(name field not specified))
+
+readAge(Map("age" -> "11"))
+// res44: FailFast[Int] = Right(11)
+
+readAge(Map("age" -> "-1"))
+// res45: FailFast[Int] = Left(List(age must be non-negative))
+
+readAge(Map())
+// res46: FailFast[Int] = Left(List(age field not specified))
+```
+
+### 5. 组合 `readName` 和 `readAge`
+
+使用 `Semigroupal` 组合 `readName` 和 `readAge`，产生一个 `User` 对象：
+
+```Scala
+def readUser(data: FormData): FailSlow[User] =
+  (
+    readName(data).toValidated,
+    readAge(data).toValidated
+  ).mapN(User.apply)
+```
+
+>在 `Validated` 和 `Either` 之间转来转去很麻烦，一般是这样的，对某个场景而言，fail-fast or accumulating error-handling 两者，只有一种比较合适，所以根据场景选择合适的错误处理策略，在场景之间交互时，再进行转换即可。
