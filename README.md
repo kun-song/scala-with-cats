@@ -49,3 +49,7 @@ scala with cats 一书的笔记、习题
     * [6.4 Validated](chapter06/Validated.md)
     * [6.5 Apply and Applicative](chapter06/Apply-and-Applicative.md)
     * [6.6 Summary](chapter06/Summary.md)
+* [Chapter 7 Foldable and Traverse](chapter07/Introduction.md)
+    * [7.1 Foldable](chapter07/Foldable.md)
+    * [7.2 Traverse](chapter07/Traverse.md)
+    * [7.3 Summary](chapter07/Summary.md)
