@@ -40,7 +40,7 @@ trait Applicative[F[_]] extends Apply[F] {
 
 引入 `Apply` 和 `Applicative` 后，基本覆盖了以不同方式进行 **sequencing computations** 的各个 type class，他们之间关系如下：
 
-![img](../images/Monad-type-class-hierarchy.png){: width="100px" height="100px"}
+![img](../images/Monad-type-class-hierarchy.png)
 
 上图中的每个 type class 都：
 
