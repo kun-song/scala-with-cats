@@ -47,5 +47,5 @@
     * [6.3 Semigroupal Applied to Different Types](chapter06/Semigroupal-Applied-to-Different-Types.md)
     * [6.4 Validated](chapter06/Validated.md)
     * [6.5 Apply and Applicative](chapter06/Apply-and-Applicative.md)
-    * [6.5 Summary](chapter06/Summary.md)
+    * [6.6 Summary](chapter06/Summary.md)
 
