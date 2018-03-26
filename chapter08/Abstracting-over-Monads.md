@@ -1,6 +1,6 @@
 # 8.2 Abstracting over Monads
 
-改造完 `UptimeClient` 后，还需要改造 `UptimeService`，都则无法编译：
+改造完 `UptimeClient` 后，还需要改造 `UptimeService`，否则无法编译：
 
 ```Scala
 import scala.language.higherKinds
