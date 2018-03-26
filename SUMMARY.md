@@ -52,4 +52,8 @@
     * [7.1 Foldable](chapter07/Foldable.md)
     * [7.2 Traverse](chapter07/Traverse.md)
     * [7.3 Summary](chapter07/Summary.md)
+* [Chapter 8 Case Study: Testing Asynchronous Code](chapter08/Introduction.md)
+    * [8.1 Abstracting over Type Constructors](chapter08/Abstracting-over-Type-Constructors.md)
+    * [8.2 Abstracting over Monads](chapter08/Abstracting-over-Monads.md)
+    * [8.3 Summary](chapter08/Summary.md)
 
