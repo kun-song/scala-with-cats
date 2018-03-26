@@ -16,6 +16,8 @@ class UptimeService[F[_]: Applicative](client: UptimeClient[F]) {
 }
 ```
 
+* 使用 `Traverse.traverse` 的前提是 `F` 必须有 `Applicative` 实例，使用 context bound 施加该约束；
+
 现在前面的单元测试无需任何修改就可以运行了：
 
 ```Scala
