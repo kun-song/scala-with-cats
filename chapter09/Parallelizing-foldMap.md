@@ -4,7 +4,7 @@
 
 分布式 `foldMap` 算法如下图：
 
-![img](../images/parallelFoldMap-algorithm.png)
+![img](../images/parallelFoldMap-algorithm.svg)
 
 1. 初始需要处理的所有数据
 2. 将初始数据分为多 **批**，每个 CPU 负责处理一个 **批**
